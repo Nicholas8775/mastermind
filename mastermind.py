@@ -3,7 +3,7 @@ import os
 
 class MMGame:
 
-    def __init__(self, history=None, answer=None):
+    def __init__(self, history=None, answer=None, evaluation=None, won=False):
 
         if history is None:
             self.attempts = []
@@ -14,9 +14,15 @@ class MMGame:
             self.secret = (0,0,1,1)
         else:
             self.secret = answer
+        
+        if evaluation is None:
+            self.evaluation = []
+        else:
+            self.evaluation = evaluation
     
     def make_guess(self, guess):
         self.attempts.append(guess)
+        self.row_feedback(-1)
 
     def get_attempt_entry(self, index):
         return self.attempts[index]
@@ -44,10 +50,10 @@ class MMGame:
                 if i != j and not checked[j] and int(self.attempts[row_num][i]) == self.secret[j]:
                     checked[j] = True
                     mismatched += 1
-                    break 
-        
+                    break
+
         wrong = (4 - matched) - mismatched
-        return (matched, mismatched, wrong)
+        self.evaluation.append((matched, mismatched, wrong))
 
 class colour:
    PURPLE = '\033[1;35;48m'
@@ -71,10 +77,9 @@ def make_row(game, row):
     return "┃{}┃{}┃{}┃{}┃".format(*data)
 
 def grade_row(game, row):
-    result = game.row_feedback(row)
+    result = game.evaluation[row]
     output = result[0] * (pins.RED + " ") + (result[1] * (pins.WHITE + " ")) + (result[2] * (pins.BLACK + " "))
     return output[:-1]
-
 
 def display_current_state(game, reveal_secret=False):
 
@@ -82,8 +87,8 @@ def display_current_state(game, reveal_secret=False):
         answer = game.get_answer()
         print(
             "┏━┳━┳━┳━┓\n" \
-            "┃{}┃{}┃{}┃{}┃\n" \
-            "┗━┻━┻━┻━┛\n".format(*answer))
+            "┃{}┃{}┃{}┃{}┃  You {}\n" \
+            "┗━┻━┻━┻━┛\n".format(*answer, ["lost!", "won!"][game.evaluation[-1][0] == 4]))
     else:
         print(
             "┏━┳━┳━┳━┓\n" \
@@ -128,6 +133,8 @@ def play_game():
 
     for _ in range(9):
         make_attempt(current_game)
+        if current_game.evaluation[-1][0] == 4:
+            break
     
     os.system("clear")
     print("\n\n\n")
