@@ -1,4 +1,5 @@
 import os
+import random
 
 
 class MMGame:
@@ -11,7 +12,9 @@ class MMGame:
             self.attempts = history
         
         if answer is None:
-            self.secret = (0,0,1,1)
+            self.secret = ()
+            for _ in range(4):
+                self.secret = (*self.secret, random.randint(1,9))
         else:
             self.secret = answer
         
@@ -120,7 +123,7 @@ def make_attempt(game):
         print("\n")
         guess = input("What is your guess?\n>>> ")
 
-        if len(guess) != 4 or not guess.isnumeric():
+        if len(guess) != 4 or not guess.isnumeric() or "0" in guess:
             os.system("clear")
             print("Not valid input try again")
         else:
