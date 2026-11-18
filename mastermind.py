@@ -20,16 +20,43 @@ class MMGame:
 
     def get_attempt_entry(self, index):
         return self.attempts[index]
+    
+    def get_answer(self):
+        return list(self.secret)
 
 
 def make_row(game, row):
-    return game.get_attempt_entry(row)
+    data = list(game.get_attempt_entry(row))
+    return "┃{}┃{}┃{}┃{}┃".format(*data)
 
-def display_current_state(game):
-    if (len(game.attempts) == 0):
-        print("-- empty --")
+def display_current_state(game, reveal_secret=False):
+
+    if reveal_secret:
+        answer = game.get_answer()
+        print(
+            "┏━┳━┳━┳━┓\n" \
+            "┃{}┃{}┃{}┃{}┃\n" \
+            "┗━┻━┻━┻━┛\n".format(*answer))
     else:
-        print(make_row(game, -1))
+        print(
+            "┏━┳━┳━┳━┓\n" \
+            "┃?┃?┃?┃?┃\n" \
+            "┗━┻━┻━┻━┛\n"
+        )
+
+    output = ["┏━┳━┳━┳━┓"]
+    for _ in range(9 - len(game.attempts)):
+        output.append("┃ ┃ ┃ ┃ ┃")
+        output.append("┣━╋━╋━╋━┫")
+
+    for x in range(len(game.attempts)-1, -1, -1):
+         output.append(make_row(game, x))
+         output.append("┣━╋━╋━╋━┫")
+
+    output[-1] = "┗━┻━┻━┻━┛\n"
+
+    for row in output:
+        print(row)
 
 def make_attempt(game):
     os.system("clear")
@@ -52,8 +79,12 @@ def make_attempt(game):
 def play_game():
     current_game = MMGame()
 
-    while True:
+    for _ in range(9):
         make_attempt(current_game)
+    
+    os.system("clear")
+    print("\n\n\n")
+    display_current_state(current_game, True)
 
 
 if __name__ == "__main__":
