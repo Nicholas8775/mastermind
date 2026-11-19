@@ -77,7 +77,7 @@ class pins:
 
 def make_row(game, row):
     data = list(game.get_attempt_entry(row))
-    return "┃{}┃{}┃{}┃{}┃".format(*data)
+    return " ┃{}┃{}┃{}┃{}┃".format(*data)
 
 def grade_row(game, row):
     result = game.evaluation[row]
@@ -89,26 +89,26 @@ def display_current_state(game, reveal_secret=False):
     if reveal_secret:
         answer = game.get_answer()
         print(
-            "┏━┳━┳━┳━┓\n" \
-            "┃{}┃{}┃{}┃{}┃  You {}\n" \
-            "┗━┻━┻━┻━┛\n".format(*answer, ["lost!", "won!"][game.evaluation[-1][0] == 4]))
+            " ┏━┳━┳━┳━┓\n" \
+            " ┃{}┃{}┃{}┃{}┃  You {}\n" \
+            " ┗━┻━┻━┻━┛".format(*answer, ["lost!", "won!"][game.evaluation[-1][0] == 4]))
     else:
         print(
-            "┏━┳━┳━┳━┓\n" \
-            "┃?┃?┃?┃?┃\n" \
-            "┗━┻━┻━┻━┛\n"
+            " ┏━┳━┳━┳━┓\n" \
+            " ┃?┃?┃?┃?┃\n" \
+            " ┗━┻━┻━┻━┛"
         )
 
-    output = ["┏━┳━┳━┳━┓"]
+    output = [" ┏━┳━┳━┳━┓"]
     for _ in range(9 - len(game.attempts)):
-        output.append("┃ ┃ ┃ ┃ ┃")
-        output.append("┣━╋━╋━╋━┫")
+        output.append(" ┃ ┃ ┃ ┃ ┃")
+        output.append(" ┣━╋━╋━╋━┫")
 
     for x in range(len(game.attempts)-1, -1, -1):
         output.append(make_row(game, x) + f" {grade_row(game, x)}")
-        output.append("┣━╋━╋━╋━┫")
+        output.append(" ┣━╋━╋━╋━┫")
 
-    output[-1] = "┗━┻━┻━┻━┛\n"
+    output[-1] = " ┗━┻━┻━┻━┛"
 
     for row in output:
         print(row)
@@ -118,9 +118,7 @@ def make_attempt(game):
     print("")
 
     while True:
-        print("\n\n")
         display_current_state(game)
-        print("\n")
         guess = input("What is your guess?\n>>> ")
 
         if len(guess) != 4 or not guess.isnumeric() or "0" in guess:
@@ -140,7 +138,7 @@ def play_game():
             break
     
     os.system("clear")
-    print("\n\n\n")
+    print("")
     display_current_state(current_game, True)
 
 
