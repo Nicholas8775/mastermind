@@ -4,7 +4,7 @@ import random
 
 class MMGame:
 
-    def __init__(self, history=None, answer=None, evaluation=None, won=False):
+    def __init__(self, history=None, answer=None, evaluation=None, won=False, game_size=4):
 
         if history is None:
             self.attempts = []
@@ -13,7 +13,7 @@ class MMGame:
         
         if answer is None:
             self.secret = ()
-            for _ in range(4):
+            for _ in range(game_size):
                 self.secret = (*self.secret, random.randint(1,9))
         else:
             self.secret = answer
@@ -34,13 +34,13 @@ class MMGame:
         return list(self.secret)
     
     def row_feedback(self, row_num):
-        checked = [False, False, False, False]
+        checked = [False] * len(self.secret)
         list_of_mismatched = []
         matched = 0
         mismatched = 0
         
         # checking for matched
-        for i in range(4):
+        for i in range(len(self.secret)):
             if self.secret[i] == int(self.attempts[row_num][i]):
                 checked[i] = True
                 matched += 1
@@ -55,5 +55,5 @@ class MMGame:
                     mismatched += 1
                     break
 
-        wrong = (4 - matched) - mismatched
+        wrong = (len(self.secret) - matched) - mismatched
         self.evaluation.append((matched, mismatched, wrong))

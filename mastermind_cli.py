@@ -59,7 +59,9 @@ def make_row(game, row, ui_format):
             for i in range(len(data)):
                 data[i] = pin_list[int(data[i])-1]
 
-    return " ┃{}┃{}┃{}┃{}┃".format(*data)
+    outcome = " ┃" + "┃".join(data) + "┃" 
+    #return " ┃{}┃{}┃{}┃{}┃".format(*data)
+    return outcome
 
 def grade_row(game, row):
     result = game.evaluation[row]
@@ -71,26 +73,27 @@ def display_current_state(game, ui_format, game_length, reveal_secret=False):
     if reveal_secret:
         answer = make_row(game, -1, ui_format)
         print(
-            " ┏━┳━┳━┳━┓\n" \
-                    "{}  You {}\n" \
-            " ┗━┻━┻━┻━┛".format(answer, ["lost!", "won!"][game.evaluation[-1][0] == 4]))
+            " ┏━" + ("┳━" * (len(game.secret)-1)) + "┓\n" +
+                    "{}  You {}\n".format(answer, ["lost!", "won!"][sum(game.evaluation[-1][1:]) == 0]) +
+            " ┗━" + ("┻━" * (len(game.secret)-1)) + "┛"
+        )
     else:
         print(
-            " ┏━┳━┳━┳━┓\n" \
-            " ┃?┃?┃?┃?┃\n" \
-            " ┗━┻━┻━┻━┛"
+            " ┏━" + ("┳━" * (len(game.secret)-1)) + "┓\n" +
+            " ┃" + ("?┃" * len(game.secret)) + "\n" +
+            " ┗━" + ("┻━" * (len(game.secret)-1)) + "┛"
         )
 
-    output = [" ┏━┳━┳━┳━┓"]
+    output = [" ┏━" + ("┳━" * (len(game.secret)-1)) + "┓"]
     for _ in range(game_length - len(game.attempts)):
-        output.append(" ┃ ┃ ┃ ┃ ┃")
-        output.append(" ┣━╋━╋━╋━┫")
+        output.append(" ┃" + (" ┃" * len(game.secret)))
+        output.append(" ┣━" + ("╋━" * (len(game.secret)-1)) + "┫")
 
     for x in range(len(game.attempts)-1, -1, -1):
         output.append(make_row(game, x, ui_format) + f" {grade_row(game, x)}")
-        output.append(" ┣━╋━╋━╋━┫")
+        output.append(" ┣━" + ("╋━" * (len(game.secret)-1)) + "┫")
 
-    output[-1] = " ┗━┻━┻━┻━┛"
+    output[-1] = " ┗━" + ("┻━" * (len(game.secret)-1)) + "┛"
 
     for row in output:
         print(row)
@@ -104,13 +107,13 @@ def make_attempt(game, ui_format, game_length):
         guess = input("What is your guess?\n>>> ")
 
         if ui_format != 2:
-            if len(guess) != 4 or not guess.isnumeric() or "0" in guess:
+            if len(guess) != len(game.secret) or not guess.isnumeric() or "0" in guess:
                 os.system("clear")
                 print("Not valid input try again")
             else:
                 break
         else:
-            if len(guess) != 4 or not all(letter in letter_to_number.keys() for letter in guess):
+            if len(guess) != len(game.secret) or not all(letter in letter_to_number.keys() for letter in guess):
                 os.system("clear")
                 print("Not valid input try again")
             else:
@@ -119,12 +122,12 @@ def make_attempt(game, ui_format, game_length):
 
     game.make_guess(guess)
 
-def play_game(format_choice, game_length):
-    current_game = MMGame()
+def play_game(format_choice, game_length, code_size):
+    current_game = MMGame(game_size=code_size)
 
     for _ in range(game_length):
         make_attempt(current_game, format_choice, game_length)
-        if current_game.evaluation[-1][0] == 4:
+        if sum(current_game.evaluation[-1][1:]) == 0:
             break
     
     os.system("clear")
@@ -137,9 +140,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--Format", type=int, choices=[0, 1, 2], default=1, help="Specify format")
     parser.add_argument("-l", "--Length", type=int, default=9, help="Game length")
+    parser.add_argument("-s", "--Size", type=int, default=4, help="How big is the secret code?")
     args = parser.parse_args()
 
     if args.Length <= 0:
         parser.error("game length must be a positive integer")
+    if args.Size <= 0:
+        parser.error("invalid code size")
 
-    play_game(args.Format, args.Length)
+    play_game(args.Format, args.Length, args.Size)
