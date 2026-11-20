@@ -66,7 +66,7 @@ def grade_row(game, row):
     output = result[0] * (pins.RED + " ") + (result[1] * (pins.WHITE + " ")) + (result[2] * (pins.BLACK + " "))
     return output[:-1]
 
-def display_current_state(game, ui_format, reveal_secret=False):
+def display_current_state(game, ui_format, game_length, reveal_secret=False):
 
     if reveal_secret:
         answer = make_row(game, -1, ui_format)
@@ -82,7 +82,7 @@ def display_current_state(game, ui_format, reveal_secret=False):
         )
 
     output = [" ┏━┳━┳━┳━┓"]
-    for _ in range(9 - len(game.attempts)):
+    for _ in range(game_length - len(game.attempts)):
         output.append(" ┃ ┃ ┃ ┃ ┃")
         output.append(" ┣━╋━╋━╋━┫")
 
@@ -95,12 +95,12 @@ def display_current_state(game, ui_format, reveal_secret=False):
     for row in output:
         print(row)
 
-def make_attempt(game, ui_format):
+def make_attempt(game, ui_format, game_length):
     os.system("clear")
     print("")
 
     while True:
-        display_current_state(game, ui_format)
+        display_current_state(game, ui_format, game_length)
         guess = input("What is your guess?\n>>> ")
 
         if ui_format != 2:
@@ -115,21 +115,31 @@ def make_attempt(game, ui_format):
                 print("Not valid input try again")
             else:
                 guess = "".join(letter_to_number[l] for l in guess)
-                #print(guess)
                 break
 
     game.make_guess(guess)
 
-
-if __name__ == "__main__":
-    format_choice = 1
+def play_game(format_choice, game_length):
     current_game = MMGame()
 
-    for _ in range(9):
-        make_attempt(current_game, format_choice)
+    for _ in range(game_length):
+        make_attempt(current_game, format_choice, game_length)
         if current_game.evaluation[-1][0] == 4:
             break
     
     os.system("clear")
     print("")
-    display_current_state(current_game, format_choice, reveal_secret=True)
+    display_current_state(current_game, format_choice, game_length, reveal_secret=True)
+
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", "--Format", type=int, choices=[0, 1, 2], default=1, help="Specify format")
+    parser.add_argument("-l", "--Length", type=int, default=9, help="Game length")
+    args = parser.parse_args()
+
+    if args.Length <= 0:
+        parser.error("game length must be a positive integer")
+
+    play_game(args.Format, args.Length)
